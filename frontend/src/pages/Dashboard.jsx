@@ -1,7 +1,7 @@
 import { Suspense, lazy } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { AlertTriangle, Zap, TrendingUp, Activity, ChevronRight } from 'lucide-react'
+import { AlertTriangle, Zap, TrendingUp, Activity } from 'lucide-react'
 import KpiCard from '../components/dashboard/KpiCard'
 import SeverityDonut from '../components/dashboard/SeverityDonut'
 import { MOCK_FINDINGS, MOCK_SCANS, MOCK_COUNTS } from '../lib/mockData'
@@ -11,10 +11,10 @@ import { pageVariants } from '../lib/motion'
 const ThreatGlobe = lazy(() => import('../components/three/ThreatGlobe'))
 
 const KPI_CARDS = [
-  { label: 'Total Findings', value: MOCK_COUNTS.total, color: '#FFFFFF', icon: Activity },
-  { label: 'Critical',        value: MOCK_COUNTS.critical, color: '#FF453A', icon: AlertTriangle },
-  { label: 'High',            value: MOCK_COUNTS.high,     color: '#FF9F0A', icon: TrendingUp },
-  { label: 'Medium',          value: MOCK_COUNTS.medium,   color: '#FFD60A', icon: Zap },
+  { label: 'Total',    value: MOCK_COUNTS.total,    color: '#FFFFFF',  icon: Activity },
+  { label: 'Critical', value: MOCK_COUNTS.critical, color: '#FF453A',  icon: AlertTriangle },
+  { label: 'High',     value: MOCK_COUNTS.high,     color: '#FF9F0A',  icon: TrendingUp },
+  { label: 'Medium',   value: MOCK_COUNTS.medium,   color: '#FFD60A',  icon: Zap },
 ]
 
 export default function Dashboard() {
@@ -28,12 +28,34 @@ export default function Dashboard() {
       exit="exit"
       className="p-8 space-y-6"
     >
-      <div>
-        <h1 className="text-[34px] font-bold text-white">Dashboard</h1>
-        <p className="text-[15px] text-white/50 mt-1">World Monitor — Security Assessment Overview</p>
+      <div className="flex items-end justify-between">
+        <div>
+          <h1
+            className="text-[28px] font-bold text-white leading-none"
+            style={{ fontFamily: '"IBM Plex Mono", monospace' }}
+          >
+            Dashboard
+          </h1>
+          <p className="text-[13px] mt-2" style={{ color: 'rgba(255,255,255,0.40)', fontFamily: '"Inter", sans-serif' }}>
+            World Monitor security assessment
+          </p>
+        </div>
+        <button
+          onClick={() => navigate('/scan/new')}
+          className="px-4 py-2 rounded-[8px] text-[13px] font-medium transition-colors duration-100"
+          style={{
+            background: 'rgba(10,124,255,0.12)',
+            color: '#0A7CFF',
+            border: '1px solid rgba(10,124,255,0.20)',
+            fontFamily: '"Inter", sans-serif',
+          }}
+        >
+          New scan
+        </button>
       </div>
 
-      <div className="grid grid-cols-4 gap-4">
+      {/* KPI row — single stagger on mount, not repeated */}
+      <div className="grid grid-cols-4 gap-3">
         {KPI_CARDS.map((card, i) => (
           <KpiCard key={card.label} {...card} index={i} />
         ))}
@@ -41,18 +63,25 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-3 gap-4">
         <div className="glass-card p-5 col-span-1">
-          <h2 className="text-[15px] font-semibold text-white mb-4">Severity Distribution</h2>
-          <div className="h-52">
+          <h2
+            className="text-[13px] font-semibold mb-4"
+            style={{ fontFamily: '"IBM Plex Mono", monospace', color: 'rgba(255,255,255,0.70)' }}
+          >
+            Severity split
+          </h2>
+          <div className="h-48">
             <SeverityDonut counts={MOCK_COUNTS} />
           </div>
-          <div className="mt-4 grid grid-cols-2 gap-2">
+          <div className="mt-4 space-y-1.5">
             {['critical', 'high', 'medium', 'low'].map((s) => {
               const cfg = getSeverityConfig(s)
               return (
                 <div key={s} className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full" style={{ background: cfg.color }} />
-                  <span className="text-[12px] text-white/60">{cfg.label}</span>
-                  <span className="text-[12px] font-semibold ml-auto" style={{ color: cfg.color }}>
+                  <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: cfg.color }} />
+                  <span className="text-[12px]" style={{ color: 'rgba(255,255,255,0.50)', fontFamily: '"Inter",sans-serif' }}>
+                    {cfg.label}
+                  </span>
+                  <span className="text-[12px] font-semibold ml-auto" style={{ color: cfg.color, fontFamily: '"IBM Plex Mono",monospace' }}>
                     {MOCK_COUNTS[s]}
                   </span>
                 </div>
@@ -62,12 +91,19 @@ export default function Dashboard() {
         </div>
 
         <div className="glass-card p-5 col-span-2 flex flex-col">
-          <h2 className="text-[15px] font-semibold text-white mb-1">Threat Origins</h2>
-          <p className="text-[12px] text-white/40 mb-3">Simulated attack source geography</p>
+          <h2
+            className="text-[13px] font-semibold mb-1"
+            style={{ fontFamily: '"IBM Plex Mono", monospace', color: 'rgba(255,255,255,0.70)' }}
+          >
+            Threat origin map
+          </h2>
+          <p className="text-[12px] mb-3" style={{ color: 'rgba(255,255,255,0.30)', fontFamily: '"Inter",sans-serif' }}>
+            Simulated attack source geography
+          </p>
           <div className="flex-1" style={{ minHeight: 240 }}>
             <Suspense fallback={
-              <div className="h-full flex items-center justify-center text-white/20 text-[13px]">
-                Loading 3D globe…
+              <div className="h-full flex items-center justify-center text-[13px]" style={{ color: 'rgba(255,255,255,0.20)' }}>
+                Loading globe…
               </div>
             }>
               <ThreatGlobe />
@@ -76,54 +112,50 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="glass-card p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-[15px] font-semibold text-white">Recent Scans</h2>
-          <button
-            onClick={() => navigate('/scan/new')}
-            className="text-[13px] text-[#0A84FF] hover:text-[#0A84FF]/80 transition-colors font-medium"
+      {/* Recent scans — clean table, no card treatment per row */}
+      <div className="glass-card overflow-hidden">
+        <div className="px-5 py-4 border-b border-white/[0.06]">
+          <h2
+            className="text-[13px] font-semibold"
+            style={{ fontFamily: '"IBM Plex Mono", monospace', color: 'rgba(255,255,255,0.70)' }}
           >
-            + New Scan
-          </button>
+            Recent scans
+          </h2>
         </div>
-        <div className="space-y-2">
-          {MOCK_SCANS.map((scan) => {
-            const total = Object.values(scan.findingCount).reduce((a, b) => a + b, 0)
-            return (
-              <motion.div
-                key={scan.id}
-                whileHover={{ x: 4, transition: { type: 'spring', stiffness: 400, damping: 30 } }}
-                onClick={() => navigate('/findings')}
-                className="flex items-center justify-between px-4 py-3 rounded-[12px]
-                  bg-white/[0.04] border border-white/[0.07] cursor-pointer
-                  hover:bg-white/[0.07] hover:border-[#0A84FF]/20 transition-all duration-150"
+        {MOCK_SCANS.map((scan) => (
+          <div
+            key={scan.id}
+            onClick={() => navigate('/findings')}
+            className="data-row flex items-center justify-between px-5 py-3.5 cursor-pointer"
+          >
+            <div>
+              <p className="text-[14px] font-medium text-white" style={{ fontFamily: '"Inter",sans-serif' }}>
+                {scan.target}
+              </p>
+              <p className="text-[12px] mt-0.5" style={{ color: 'rgba(255,255,255,0.35)', fontFamily: '"Inter",sans-serif' }}>
+                {scan.modules.join(', ')} · {new Date(scan.startedAt).toLocaleDateString()}
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="flex gap-3">
+                {Object.entries(scan.findingCount).filter(([, v]) => v > 0).slice(0, 3).map(([s, v]) => {
+                  const cfg = getSeverityConfig(s)
+                  return (
+                    <span key={s} className="text-[12px] font-semibold" style={{ color: cfg.color, fontFamily: '"IBM Plex Mono",monospace' }}>
+                      {v} {cfg.label}
+                    </span>
+                  )
+                })}
+              </div>
+              <span
+                className="text-[11px] px-2 py-0.5 rounded-full"
+                style={{ background: 'rgba(48,209,88,0.12)', color: '#30D158', fontFamily: '"Inter",sans-serif' }}
               >
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-[14px] font-medium text-white">{scan.target}</span>
-                  <span className="text-[12px] text-white/40">
-                    {scan.modules.join(' · ')} · {new Date(scan.startedAt).toLocaleDateString()}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="flex gap-2">
-                    {Object.entries(scan.findingCount).filter(([, v]) => v > 0).slice(0, 3).map(([s, v]) => {
-                      const cfg = getSeverityConfig(s)
-                      return (
-                        <span key={s} className="text-[12px] font-semibold" style={{ color: cfg.color }}>
-                          {v} {cfg.label.slice(0, 4)}
-                        </span>
-                      )
-                    })}
-                  </div>
-                  <span className="text-[12px] px-2 py-0.5 rounded-full bg-[#30D158]/15 text-[#30D158] border border-[#30D158]/20">
-                    Completed
-                  </span>
-                  <ChevronRight size={14} className="text-white/20" />
-                </div>
-              </motion.div>
-            )
-          })}
-        </div>
+                Done
+              </span>
+            </div>
+          </div>
+        ))}
       </div>
     </motion.div>
   )

@@ -1,11 +1,10 @@
-import { useState, Suspense } from 'react'
+import { useState, Suspense, lazy } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Shield, AlertTriangle } from 'lucide-react'
-import { lazy } from 'react'
+import { AlertTriangle } from 'lucide-react'
 import AppleInput from '../components/ui/AppleInput'
 import AppleButton from '../components/ui/AppleButton'
-import { pageVariants, cardVariants } from '../lib/motion'
+import { pageVariants } from '../lib/motion'
 
 const ParticleNetwork = lazy(() => import('../components/three/ParticleNetwork'))
 
@@ -19,14 +18,13 @@ export default function Login() {
     e.preventDefault()
     setError('')
     setLoading(true)
-
-    await new Promise((r) => setTimeout(r, 800))
+    await new Promise((r) => setTimeout(r, 700))
 
     if (form.email === 'assessor@ntro.gov.in' && form.password === 'worldmonitor2026') {
       localStorage.setItem('token', 'mock-jwt-token')
       navigate('/dashboard')
     } else {
-      setError('Invalid credentials. Use assessor@ntro.gov.in / worldmonitor2026')
+      setError('Email or password is incorrect.')
     }
     setLoading(false)
   }
@@ -37,26 +35,31 @@ export default function Login() {
       initial="initial"
       animate="animate"
       exit="exit"
-      className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black"
+      className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      style={{ background: '#070C14' }}
     >
       <Suspense fallback={null}>
         <ParticleNetwork />
       </Suspense>
 
-      <div className="relative z-10 w-full max-w-sm px-4">
+      <div className="relative z-10 w-full max-w-xs px-4">
         <motion.div
-          variants={cardVariants}
-          initial="initial"
-          animate="animate"
-          custom={0}
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
           className="glass-card p-8"
         >
-          <div className="flex flex-col items-center gap-2 mb-8">
-            <div className="w-14 h-14 rounded-[16px] bg-[#0A84FF] flex items-center justify-center shadow-[0_0_40px_rgba(10,132,255,0.5)] mb-2">
-              <Shield size={28} className="text-white" />
-            </div>
-            <h1 className="text-[22px] font-bold text-white">World Monitor</h1>
-            <p className="text-[14px] text-white/50">Security Assessment Platform</p>
+          {/* Wordmark */}
+          <div className="mb-8">
+            <p
+              className="text-[22px] font-bold leading-none"
+              style={{ fontFamily: '"IBM Plex Mono", monospace', color: '#fff' }}
+            >
+              WM/SEC
+            </p>
+            <p className="text-[12px] mt-2" style={{ color: 'rgba(255,255,255,0.35)', fontFamily: '"Inter",sans-serif' }}>
+              Authorized access only — NTRO
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -64,7 +67,7 @@ export default function Login() {
               label="Email"
               type="email"
               name="email"
-              placeholder="assessor@ntro.gov.in"
+              placeholder="you@ntro.gov.in"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               required
@@ -80,29 +83,24 @@ export default function Login() {
             />
 
             {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex items-start gap-2 px-3 py-2.5 rounded-[10px] bg-[#FF453A]/10 border border-[#FF453A]/20 text-[13px] text-[#FF453A]"
+              <div
+                className="flex items-start gap-2 px-3 py-2.5 rounded-[8px] text-[13px]"
+                style={{
+                  background: 'rgba(255,69,58,0.10)',
+                  border: '1px solid rgba(255,69,58,0.20)',
+                  color: '#FF453A',
+                  fontFamily: '"Inter",sans-serif',
+                }}
               >
-                <AlertTriangle size={14} className="shrink-0 mt-0.5" />
+                <AlertTriangle size={13} className="shrink-0 mt-0.5" />
                 {error}
-              </motion.div>
+              </div>
             )}
 
-            <AppleButton
-              type="submit"
-              size="lg"
-              disabled={loading}
-              className="mt-2 w-full"
-            >
-              {loading ? 'Signing in…' : 'Sign In'}
+            <AppleButton type="submit" size="lg" disabled={loading} className="mt-1 w-full">
+              {loading ? 'Signing in…' : 'Sign in'}
             </AppleButton>
           </form>
-
-          <p className="text-center text-[12px] text-white/25 mt-6">
-            ⚠ Authorized personnel only — NTRO Internal
-          </p>
         </motion.div>
       </div>
     </motion.div>

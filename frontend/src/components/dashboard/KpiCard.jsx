@@ -8,20 +8,22 @@ export default function KpiCard({ label, value, color, icon: Icon, index = 0 }) 
       initial="initial"
       animate="animate"
       custom={index}
-      className="glass-card p-5 flex flex-col gap-3"
+      className="glass-card p-5"
     >
-      <div className="flex items-center justify-between">
-        <span className="text-[13px] text-white/50 font-medium">{label}</span>
+      <div className="flex items-center justify-between mb-3">
+        <span
+          className="text-[12px]"
+          style={{ color: 'rgba(255,255,255,0.45)', fontFamily: '"Inter",sans-serif', fontWeight: 500 }}
+        >
+          {label}
+        </span>
         {Icon && (
-          <div className="w-8 h-8 rounded-[8px] flex items-center justify-center"
-            style={{ background: `${color}20` }}>
-            <Icon size={15} style={{ color }} />
-          </div>
+          <Icon size={14} style={{ color: color === '#FFFFFF' ? 'rgba(255,255,255,0.30)' : `${color}80` }} />
         )}
       </div>
       <span
-        className="text-[42px] font-bold leading-none"
-        style={{ color: color ?? '#FFFFFF' }}
+        className="text-[40px] font-bold leading-none block"
+        style={{ color: color ?? '#FFFFFF', fontFamily: '"IBM Plex Mono", monospace' }}
       >
         {value}
       </span>

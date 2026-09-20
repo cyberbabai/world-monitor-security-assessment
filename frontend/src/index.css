@@ -1,24 +1,26 @@
 @import "tailwindcss";
 
 @theme {
-  --color-apple-blue: #0A84FF;
-  --color-apple-red: #FF453A;
-  --color-apple-orange: #FF9F0A;
-  --color-apple-yellow: #FFD60A;
-  --color-apple-green: #30D158;
-  --color-apple-gray: #636366;
+  /* Severity — semantic, keep as-is */
+  --color-sev-critical: #FF453A;
+  --color-sev-high:     #FF9F0A;
+  --color-sev-medium:   #FFD60A;
+  --color-sev-low:      #30D158;
+  --color-sev-info:     #636366;
 
-  --color-bg-base: #000000;
-  --color-bg-elevated: #1C1C1E;
+  /* Accent — slightly cooler than stock Apple blue, more distinctive */
+  --color-accent:       #0A7CFF;
+  --color-accent-dim:   rgba(10, 124, 255, 0.15);
 
-  --font-family-sans: -apple-system, "SF Pro Display", "SF Pro Text", BlinkMacSystemFont, "Helvetica Neue", sans-serif;
-  --font-family-mono: "SF Mono", "Fira Code", ui-monospace, monospace;
+  /* Surfaces — deep navy-black, not pure #000 */
+  --color-bg-base:      #070C14;
+  --color-bg-raised:    #0D1420;
+  --color-bg-elevated:  #141C2B;
 
-  --radius-apple: 20px;
-  --radius-apple-sm: 12px;
-
-  --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  --shadow-glass-hover: 0 16px 48px rgba(0, 0, 0, 0.5);
+  /* Type */
+  --font-display: "IBM Plex Mono", ui-monospace, monospace;
+  --font-body:    "Inter", system-ui, sans-serif;
+  --font-code:    "IBM Plex Mono", ui-monospace, monospace;
 }
 
 * {
@@ -27,17 +29,17 @@
   padding: 0;
 }
 
-*,
-*::before,
-*::after {
+*, *::before, *::after {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background-color: #000000;
+  background-color: #070C14;
   color: #FFFFFF;
-  font-family: -apple-system, "SF Pro Display", "SF Pro Text", BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
   overflow-x: hidden;
   min-height: 100vh;
 }
@@ -47,57 +49,70 @@ body {
   width: 100%;
 }
 
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.25);
+/* IBM Plex Mono for all headings */
+h1, h2, h3 {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: -0.02em;
 }
 
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
+
+/* Glass — used sparingly for elevated focal surfaces only */
 .glass-card {
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
 }
 
+/* Slightly smaller variant for inline containers */
 .glass-card-sm {
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
 }
 
+/* Sidebar — distinct from cards: uses solid elevated surface, not glass */
 .glass-sidebar {
-  background: rgba(28, 28, 30, 0.85);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background: #0D1420;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+/* Data table rows — no card treatment, just structure */
+.data-row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 120ms ease;
+}
+.data-row:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+.data-row:last-child {
+  border-bottom: none;
+}
+
+/* Terminal / code output */
 .terminal-text {
-  font-family: "SF Mono", "Fira Code", ui-monospace, monospace;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
   font-size: 13px;
   color: #30D158;
+  line-height: 1.6;
 }
 
-@keyframes pulse-glow {
+/* Scan cursor blink */
+@keyframes blink {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  50% { opacity: 0; }
+}
+.cursor-blink {
+  animation: blink 1s step-end infinite;
 }
 
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
 }
