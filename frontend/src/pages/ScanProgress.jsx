@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, Suspense, lazy } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { getSeverityConfig } from '../lib/cvss'
 import AppleButton from '../components/ui/AppleButton'
@@ -47,6 +47,9 @@ const PHASES = ['Recon', 'Auth', 'Authorization', 'Injection', 'TLS', 'Client-Si
 
 export default function ScanProgress() {
   const navigate = useNavigate()
+  const { id } = useParams()
+  const isDemo = id === 'demo'
+
   const [logs, setLogs] = useState([])
   const [progress, setProgress] = useState(0)
   const [findings, setFindings] = useState([])
@@ -55,26 +58,47 @@ export default function ScanProgress() {
   const logRef = useRef(null)
   const timerRef = useRef(null)
 
+  // Demo mode: replay the static LOG_SEQUENCE
   useEffect(() => {
+    if (!isDemo) return
     timerRef.current = setInterval(() => setElapsed((t) => t + 1), 1000)
     const timeouts = LOG_SEQUENCE.map((entry, i) =>
       setTimeout(() => {
         setLogs((prev) => [...prev, entry])
         setProgress(Math.round(((i + 1) / LOG_SEQUENCE.length) * 100))
-        if (entry.severity) {
-          setFindings((prev) => [...prev, { severity: entry.severity }])
-        }
-        if (i === LOG_SEQUENCE.length - 1) {
-          setDone(true)
-          clearInterval(timerRef.current)
-        }
+        if (entry.severity) setFindings((prev) => [...prev, { severity: entry.severity }])
+        if (i === LOG_SEQUENCE.length - 1) { setDone(true); clearInterval(timerRef.current) }
       }, entry.delay)
     )
-    return () => {
-      timeouts.forEach(clearTimeout)
+    return () => { timeouts.forEach(clearTimeout); clearInterval(timerRef.current) }
+  }, [isDemo])
+
+  // Live mode: consume SSE stream from the real API
+  useEffect(() => {
+    if (isDemo) return
+    timerRef.current = setInterval(() => setElapsed((t) => t + 1), 1000)
+    const token = localStorage.getItem('token')
+    const apiBase = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
+    const es = new EventSource(`${apiBase}/scans/${id}/stream?token=${token}`)
+
+    es.addEventListener('log', (e) => {
+      const data = JSON.parse(e.data)
+      const sevKeys = ['critical', 'high', 'medium', 'low']
+      setLogs((prev) => [...prev, { text: data.message, type: data.level }])
+      if (sevKeys.includes(data.level)) setFindings((prev) => [...prev, { severity: data.level }])
+      setProgress((p) => Math.min(p + 2, 95))
+    })
+    es.addEventListener('done', (e) => {
+      const data = JSON.parse(e.data)
+      setDone(true)
+      setProgress(100)
       clearInterval(timerRef.current)
-    }
-  }, [])
+      es.close()
+    })
+    es.onerror = () => es.close()
+
+    return () => { es.close(); clearInterval(timerRef.current) }
+  }, [id, isDemo])
 
   useEffect(() => {
     if (logRef.current) {

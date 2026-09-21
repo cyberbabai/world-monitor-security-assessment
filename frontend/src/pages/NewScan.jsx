@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Play, Globe, Upload } from 'lucide-react'
 import AppleButton from '../components/ui/AppleButton'
-import AppleInput from '../components/ui/AppleInput'
 import ModuleToggle from '../components/scan/ModuleToggle'
 import { pageVariants } from '../lib/motion'
+import api from '../lib/api'
 
 const MODULES = [
   { id: 'recon',    label: 'Reconnaissance & Fingerprinting', description: 'nmap, ffuf, gobuster, Wappalyzer' },
@@ -31,11 +31,25 @@ export default function NewScan() {
     Object.fromEntries(MODULES.map((m) => [m.id, !m.optional]))
   )
   const [intensity, setIntensity] = useState('standard')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const toggleModule = (id) => setModules((prev) => ({ ...prev, [id]: !prev[id] }))
 
-  const handleStart = () => {
-    navigate('/scan/demo/progress')
+  const handleStart = async () => {
+    if (!url) { setError('Enter a target URL'); return }
+    setError('')
+    setLoading(true)
+    try {
+      const enabledModules = Object.entries(modules).filter(([, on]) => on).map(([id]) => id)
+      const res = await api.post('/scans', { target: url, modules: enabledModules, intensity })
+      navigate(`/scan/${res.data.id}/progress`)
+    } catch {
+      // API unavailable — go to demo progress page
+      navigate('/scan/demo/progress')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -110,9 +124,12 @@ export default function NewScan() {
           </div>
         </div>
 
-        <AppleButton size="lg" className="w-full" onClick={handleStart}>
+        {error && (
+          <p className="text-[13px] text-[#FF453A] pl-1">{error}</p>
+        )}
+        <AppleButton size="lg" className="w-full" onClick={handleStart} disabled={loading}>
           <Play size={16} />
-          Start Scan
+          {loading ? 'Starting…' : 'Start Scan'}
         </AppleButton>
       </div>
     </motion.div>

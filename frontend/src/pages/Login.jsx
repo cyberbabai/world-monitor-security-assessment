@@ -18,13 +18,29 @@ export default function Login() {
     e.preventDefault()
     setError('')
     setLoading(true)
-    await new Promise((r) => setTimeout(r, 700))
-
-    if (form.email === 'assessor@ntro.gov.in' && form.password === 'worldmonitor2026') {
-      localStorage.setItem('token', 'mock-jwt-token')
-      navigate('/dashboard')
-    } else {
-      setError('Email or password is incorrect.')
+    try {
+      const body = new URLSearchParams()
+      body.append('username', form.email)
+      body.append('password', form.password)
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL ?? 'http://localhost:8000'}/auth/login`,
+        { method: 'POST', body, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+      )
+      if (res.ok) {
+        const data = await res.json()
+        localStorage.setItem('token', data.access_token)
+        navigate('/dashboard')
+      } else {
+        setError('Email or password is incorrect.')
+      }
+    } catch {
+      // API unreachable — fall back to mock credentials for demo/offline mode
+      if (form.email === 'assessor@ntro.gov.in' && form.password === 'worldmonitor2026') {
+        localStorage.setItem('token', 'mock-jwt-token')
+        navigate('/dashboard')
+      } else {
+        setError('Email or password is incorrect.')
+      }
     }
     setLoading(false)
   }
